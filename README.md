@@ -18,9 +18,3 @@ Configuration
 
 1. Database Connection:
 
-Locate the environment variable file (e.g., .env or a similar file) in the project directory. If it doesn't exist, create one.
-
-Add the following environment variable to the file, replacing <your_mongodb_connection_string> with your actual MongoDB connection string:
-
-MONGODB_URI=<your_mongodb_connection_string>
-You can obtain your MongoDB connection string from the Atlas dashboard (https://cloud.mongodb.com/).

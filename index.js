@@ -1,39 +1,40 @@
-import dotenv from "dotenv";
-dotenv.config();
-import express from "express";
-import bcrypt from "bcrypt";
+import express from 'express';
+import dotenv from 'dotenv';
+import sequelize from './configs/database.js';
+import adminRoutes from './routes/adminRoutes.js';
 import cors from "cors";
-import mongoose from "mongoose";
-import configurations from "./configs/index.js";
-//import signupRouter from "./routes/signup.route.js";
-import router from "./routes/login.route.js";
-import ErrorHandler from "./middlewares/ErrorHandler.js";
-import { fileURLToPath } from "url";
-import path from 'path'
-const __filename=fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-// app.set('view engine', 'ejs');
-// app.set('views', path.join(__dirname, 'views))
+
+// Load environment variables
+dotenv.config();
+
+const corsOptions = {
+  origin: "http://localhost:5173",
+  allowedHeaders: ["Authorization", "Content-Type"],
+};
+
+// Sync models
+(async () => {
+  try {
+    await sequelize.sync();
+    console.log('Database synced successfully.');
+  } catch (error) {
+    console.error('Error syncing database:', error);
+  }
+})();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
-
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
-//app.use('/signup', signupRouter);
-app.use( router);
+app.use(express.urlencoded({ extended: true }));
 
-mongoose.connect(configurations.MONGODB_CONNECTION_STRING)
-.then(() => {
-    console.log("Connected to MongoDB");
-    app.listen(configurations.PORT, () => {
-        console.log(`Server is running on port ${configurations.PORT}`);
-    })
-})
-.catch(err => {
-    console.log(err);
-})
+// Use routes
+app.use('/api/admin', adminRoutes);
+app.get('/test', (req, res) => {
+  res.json({ message: 'Server is running' });
+});
 
-
-
-app.use(ErrorHandler);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
