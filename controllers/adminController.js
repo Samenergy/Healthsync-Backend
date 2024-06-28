@@ -1,6 +1,11 @@
 import bcrypt from 'bcryptjs';
 import Hospital from '../models/hospital.js';
 import Administrator from '../models/administrator.js';
+import Doctor from '../models/Doctor.js';
+import Nurse from '../models/Nurse.js';
+import Receptionist from '../models/Receptionist.js';
+import Cashier from '../models/Cashier.js';
+
 
 export const signupAdminAndHospital = async (req, res) => {
   const {
@@ -62,5 +67,39 @@ export const signupAdminAndHospital = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'An error occurred during signup', error: error.message });
+  }
+};
+
+export const addUser = async (req, res) => {
+  const { role, ...userData } = req.body;
+
+  try {
+    let newUser;
+    switch (role) {
+      case 'Administrator':
+        newUser = await Administrator.create(userData);
+        break;
+      case 'Doctor':
+        newUser = await Doctor.create(userData);
+        break;
+      case 'Nurse':
+        newUser = await Nurse.create(userData);
+        break;
+      case 'Receptionist':
+        newUser = await Receptionist.create(userData);
+        break;
+      case 'Cashier':
+        newUser = await Cashier.create(userData);
+        break;
+      case 'Patient':
+        newUser = await Patient.create(userData);
+        break;
+      default:
+        return res.status(400).json({ error: 'Invalid role' });
+    }
+
+    res.status(201).json(newUser);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to add user' });
   }
 };
