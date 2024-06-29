@@ -1,41 +1,48 @@
-import express from "express";
-import dotenv from "dotenv";
-import sequelize from "./configs/database.js";
-import adminRoutes from "./routes/adminRoutes.js";
-import cors from "cors";
-import bodyParser from "body-parser";
-import authRoutes from "./routes/AuthRoutes.js";
+import express from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+
+import sequelize from './config/database.js';
+import authRoutes from './routes/AuthRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 dotenv.config();
 
 const corsOptions = {
-  origin: "http://localhost:5173",
-  allowedHeaders: ["Authorization", "Content-Type"],
+  origin: 'http://localhost:5173',
+  allowedHeaders: ['Authorization', 'Content-Type'],
 };
 
-
-(async () => {
-  try {
-    await sequelize.sync();
-    console.log("Database synced successfully.");
-  } catch (error) {
-    console.error("Error syncing database:", error);
-  }
-})();
-
+// Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Middleware setup
 app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use("/api", authRoutes);
-app.use("/api", adminRoutes);
-app.get("/test", (req, res) => {
-  res.json({ message: "Server is running" });
+app.use(express.json()); // Parses incoming JSON requests
+app.use(express.urlencoded({ extended: true })); // Parses incoming URL-encoded data
+app.use(bodyParser.json()); // Parses incoming JSON requests
+
+// Define routes
+app.use('/api', authRoutes);
+app.use('/api/admin', adminRoutes);
+app.get('/test', (req, res) => {
+  res.json({ message: 'Server is running' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Start the server
+(async () => {
+  try {
+    // Sync database
+    await sequelize.sync({ alter: true }); 
+    console.log('Database synced successfully.');
+
+    // Start the Express server
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Error syncing database:', error);
+  }
+})();

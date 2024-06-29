@@ -1,8 +1,8 @@
-import { DataTypes } from "sequelize";
-import sequelize from "../configs/database.js";
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database.js';
 
 const Hospital = sequelize.define(
-  "Hospital",
+  'Hospital',
   {
     hospitalId: {
       type: DataTypes.INTEGER,
@@ -28,11 +28,11 @@ const Hospital = sequelize.define(
 );
 
 Hospital.associate = (models) => {
-  Hospital.hasMany(models.Administrator, { foreignKey: "hospitalId" });
-  Hospital.hasMany(models.Doctor, { foreignKey: "hospitalId" });
-  Hospital.hasMany(models.Nurse, { foreignKey: "hospitalId" });
-  Hospital.hasMany(models.Receptionist, { foreignKey: "hospitalId" });
-  Hospital.hasMany(models.Cashier, { foreignKey: "hospitalId" });
+  Hospital.hasMany(models.Administrator, { foreignKey: 'hospitalId' });
+  Hospital.hasMany(models.Doctor, { foreignKey: 'hospitalId' });
+  Hospital.hasMany(models.Nurse, { foreignKey: 'hospitalId' });
+  Hospital.hasMany(models.Receptionist, { foreignKey: 'hospitalId' });
+  Hospital.hasMany(models.Cashier, { foreignKey: 'hospitalId' });
 };
 
 export default Hospital;

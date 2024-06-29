@@ -1,29 +1,39 @@
 import jwt from 'jsonwebtoken';
-import Administrator from '../models/administrator.js';
+import { models } from '../models/index.js';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Check if the administrator exists
-    const admin = await Administrator.findOne({ where: { email } });
+    const admin = await models.Administrator.findOne({
+      where: { email },
+      include: {
+        model: models.Hospital,
+        attributes: ['hospitalId', 'hospitalName']
+      }
+    });
 
-    // If administrator not found or password is invalid
     if (!admin || !admin.validPassword(password)) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    // Generate JWT token with administrator's id, email, and role
     const token = jwt.sign(
-      { id: admin.id, email: admin.email, role: 'administrator' }, // Adjust 'role' based on your application logic
-      'your_secret_key',
-      {
-        expiresIn: '1h', // Example expiration time
-      }
+      { id: admin.adminId, email: admin.email, role: 'administrator' },
+      process.env.JWT_SECRET,  
+      { expiresIn: '1h' }
     );
-
-    // Respond with the generated token and administrator's role
-    res.json({ token, user: { id: admin.id, email: admin.email, role: 'administrator' } });
+    res.json({
+      token,
+      user: {
+        id: admin.adminId,
+        email: admin.email,
+        role: 'administrator',
+        hospitalId: admin.Hospital.hospitalId,
+        hospitalName: admin.Hospital.hospitalName
+      }
+    });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error' });

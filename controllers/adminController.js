@@ -72,27 +72,29 @@ export const signupAdminAndHospital = async (req, res) => {
 
 export const addUser = async (req, res) => {
   const { role, ...userData } = req.body;
+  const { hospitalId } = req; // Fetch the hospital ID from the request context
 
   try {
+    // Validate role and add user to the corresponding model
     let newUser;
     switch (role) {
       case 'Administrator':
-        newUser = await Administrator.create(userData);
+        newUser = await Administrator.create({ ...userData, hospitalId });
         break;
       case 'Doctor':
-        newUser = await Doctor.create(userData);
+        newUser = await Doctor.create({ ...userData, hospitalId });
         break;
       case 'Nurse':
-        newUser = await Nurse.create(userData);
+        newUser = await Nurse.create({ ...userData, hospitalId });
         break;
       case 'Receptionist':
-        newUser = await Receptionist.create(userData);
+        newUser = await Receptionist.create({ ...userData, hospitalId });
         break;
       case 'Cashier':
-        newUser = await Cashier.create(userData);
+        newUser = await Cashier.create({ ...userData, hospitalId });
         break;
       case 'Patient':
-        newUser = await Patient.create(userData);
+        newUser = await Patient.create({ ...userData, hospitalId });
         break;
       default:
         return res.status(400).json({ error: 'Invalid role' });
@@ -100,6 +102,7 @@ export const addUser = async (req, res) => {
 
     res.status(201).json(newUser);
   } catch (error) {
+    console.error('Failed to add user:', error);
     res.status(500).json({ error: 'Failed to add user' });
   }
 };
