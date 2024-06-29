@@ -17,6 +17,8 @@ const Cashier = sequelize.define(
     name: DataTypes.STRING,
     email: DataTypes.STRING,
     phoneNumber: DataTypes.STRING,
+    password: DataTypes.STRING,
+    responsibilities: DataTypes.TEXT, // New field for responsibilities
   },
   {
     timestamps: true,

@@ -71,30 +71,29 @@ export const signupAdminAndHospital = async (req, res) => {
 };
 
 export const addUser = async (req, res) => {
-  const { role, ...userData } = req.body;
+  const { role, password, responsibilities,field,specialization, ...userData } = req.body;  // Extract password and responsibilities from req.body
   const { hospitalId } = req; // Fetch the hospital ID from the request context
 
   try {
-    // Validate role and add user to the corresponding model
     let newUser;
     switch (role) {
       case 'Administrator':
-        newUser = await Administrator.create({ ...userData, hospitalId });
+        newUser = await Administrator.create({ ...userData, password, hospitalId });
         break;
       case 'Doctor':
-        newUser = await Doctor.create({ ...userData, hospitalId });
+        newUser = await Doctor.create({ ...userData, password, hospitalId,specialization });
         break;
       case 'Nurse':
-        newUser = await Nurse.create({ ...userData, hospitalId });
+        newUser = await Nurse.create({ ...userData, password, hospitalId,field });
         break;
       case 'Receptionist':
-        newUser = await Receptionist.create({ ...userData, hospitalId });
+        newUser = await Receptionist.create({ ...userData, password, hospitalId, responsibilities });  // Include responsibilities for Receptionist
         break;
       case 'Cashier':
-        newUser = await Cashier.create({ ...userData, hospitalId });
+        newUser = await Cashier.create({ ...userData, password, hospitalId, responsibilities });  // Include responsibilities for Cashier
         break;
       case 'Patient':
-        newUser = await Patient.create({ ...userData, hospitalId });
+        newUser = await Patient.create({ ...userData, password, hospitalId });
         break;
       default:
         return res.status(400).json({ error: 'Invalid role' });

@@ -28,4 +28,11 @@ Administrator.prototype.validPassword = function (password) {
   return bcrypt.compareSync(password, this.password);
 };
 
+// Hash password before saving
+Administrator.beforeCreate((admin) => {
+  if (admin.password) {
+    admin.password = bcrypt.hashSync(admin.password, 10);
+  }
+});
+
 export default Administrator;
