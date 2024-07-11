@@ -29,15 +29,16 @@ Receptionist.associate = (models) => {
   Receptionist.belongsTo(models.Hospital, { foreignKey: "hospitalId" });
 };
 
-Receptionist.prototype.validPassword = function (password) {
-  return bcrypt.compareSync(password, this.password);
+Receptionist.prototype.validPassword = async function (password) {
+  return bcrypt.compare(password, this.password);
 };
 
-// Hash password before saving
-Receptionist.beforeCreate((receptionist) => {
+
+Receptionist.beforeCreate(async (receptionist) => {
   if (receptionist.password) {
-    receptionist.password = bcrypt.hashSync(receptionist.password, 10);
+    receptionist.password = await bcrypt.hash(receptionist.password, 10);
   }
 });
+
 
 export default Receptionist;

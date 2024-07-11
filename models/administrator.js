@@ -1,19 +1,33 @@
-import { DataTypes } from 'sequelize';
-import sequelize from '../config/database.js';
-import Hospital from './hospital.js';
-import bcrypt from 'bcrypt';
+import { DataTypes } from "sequelize";
+import sequelize from "../config/database.js";
+import Hospital from "./hospital.js";
+import bcrypt from "bcrypt";
 
 const Administrator = sequelize.define(
-  'Administrator',
+  "Administrator",
   {
     adminId: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     hospitalId: {
       type: DataTypes.INTEGER,
-      references: { model: Hospital, key: 'hospitalId' },
+      references: { model: Hospital, key: "hospitalId" },
     },
-    name: DataTypes.STRING,
-    email: DataTypes.STRING,
-    password: DataTypes.STRING,
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    picture: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     timestamps: true,
@@ -21,17 +35,16 @@ const Administrator = sequelize.define(
 );
 
 Administrator.associate = (models) => {
-  Administrator.belongsTo(models.Hospital, { foreignKey: 'hospitalId' });
+  Administrator.belongsTo(models.Hospital, { foreignKey: "hospitalId" });
 };
 
-Administrator.prototype.validPassword = function (password) {
-  return bcrypt.compareSync(password, this.password);
+Administrator.prototype.validPassword = async function (password) {
+  return bcrypt.compare(password, this.password);
 };
 
-// Hash password before saving
-Administrator.beforeCreate((admin) => {
+Administrator.beforeCreate(async (admin) => {
   if (admin.password) {
-    admin.password = bcrypt.hashSync(admin.password, 10);
+    admin.password = await bcrypt.hash(admin.password, 10);
   }
 });
 

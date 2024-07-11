@@ -28,5 +28,14 @@ const Cashier = sequelize.define(
 Cashier.associate = (models) => {
   Cashier.belongsTo(models.Hospital, { foreignKey: "hospitalId" });
 };
+Cashier.prototype.validPassword = async function (password) {
+  return bcrypt.compare(password, this.password);
+};
+Cashier.beforeCreate(async (cashier) => {
+  if (cashier.password) {
+    cashier.password = await bcrypt.hash(cashier.password, 10);
+  }
+});
+
 
 export default Cashier;

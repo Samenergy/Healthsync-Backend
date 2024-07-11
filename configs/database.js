@@ -14,13 +14,14 @@ const sequelize = new Sequelize(
   }
 );
 
-(async () => {
-  try {
-    await sequelize.authenticate();
-    console.log('Connection has been established successfully.');
-  } catch (error) {
-    console.error('Unable to connect to the database:', error);
-  }
-})();
+// Authenticate connection
+sequelize.authenticate()
+  .then(() => console.log('Connection has been established successfully.'))
+  .catch((error) => console.error('Unable to connect to the database:', error));
 
 export default sequelize;
+
+process.on('unhandledRejection', (error) => {
+  console.error('Unhandled Rejection:', error);
+  // Optionally: process.exit(1); // To force the process to exit on unhandled rejections
+});

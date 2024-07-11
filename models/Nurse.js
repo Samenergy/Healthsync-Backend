@@ -24,14 +24,15 @@ const Nurse = sequelize.define(
 Nurse.associate = (models) => {
   Nurse.belongsTo(models.Hospital, { foreignKey: "hospitalId" });
 };
-Nurse.prototype.validPassword = function (password) {
-  return bcrypt.compareSync(password, this.password);
+Nurse.prototype.validPassword = async function (password) {
+  return bcrypt.compare(password, this.password);
 };
 
-// Hash password before saving
-Nurse.beforeCreate((nurse) => {
+
+Nurse.beforeCreate(async (nurse) => {
   if (nurse.password) {
-    nurse.password = bcrypt.hashSync(nurse.password, 10);
+    nurse.password = await bcrypt.hash(nurse.password, 10);
   }
 });
+
 export default Nurse;
