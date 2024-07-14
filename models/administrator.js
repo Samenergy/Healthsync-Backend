@@ -18,7 +18,7 @@ const Administrator = sequelize.define(
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
+      unique: true, // Ensure this is not duplicated
     },
     password: {
       type: DataTypes.STRING,
@@ -34,18 +34,20 @@ const Administrator = sequelize.define(
   }
 );
 
-Administrator.associate = (models) => {
-  Administrator.belongsTo(models.Hospital, { foreignKey: "hospitalId" });
-};
-
-Administrator.prototype.validPassword = async function (password) {
-  return bcrypt.compare(password, this.password);
-};
-
+// Hash the password before saving to the database
 Administrator.beforeCreate(async (admin) => {
   if (admin.password) {
     admin.password = await bcrypt.hash(admin.password, 10);
   }
 });
+
+// Compare passwords for authentication
+Administrator.prototype.validPassword = async function (password) {
+  return bcrypt.compare(password, this.password);
+};
+
+Administrator.associate = (models) => {
+  Administrator.belongsTo(models.Hospital, { foreignKey: "hospitalId" });
+};
 
 export default Administrator;

@@ -1,7 +1,8 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 import Hospital from "./hospital.js";
-import bcrypt from 'bcrypt';
+import bcrypt from "bcrypt";
+
 const Doctor = sequelize.define(
   "Doctor",
   {
@@ -19,6 +20,10 @@ const Doctor = sequelize.define(
     phoneNumber: DataTypes.STRING,
     specialization: DataTypes.STRING,
     password: DataTypes.STRING,
+    picture: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     timestamps: true,
@@ -28,10 +33,10 @@ const Doctor = sequelize.define(
 Doctor.associate = (models) => {
   Doctor.belongsTo(models.Hospital, { foreignKey: "hospitalId" });
 };
+
 Doctor.prototype.validPassword = async function (password) {
   return bcrypt.compare(password, this.password);
 };
-
 
 Doctor.beforeCreate(async (doctor) => {
   if (doctor.password) {

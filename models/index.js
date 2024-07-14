@@ -1,10 +1,12 @@
-import sequelize from "../config/database.js";
-import Hospital from "./hospital.js";
-import Administrator from "./administrator.js";
-import Doctor from "./Doctor.js";
-import Nurse from "./Nurse.js";
-import Receptionist from "./Receptionist.js";
-import Cashier from "./Cashier.js";
+import sequelize from '../config/database.js';
+import Hospital from './hospital.js';
+import Administrator from './administrator.js';
+import Doctor from './Doctor.js';
+import Nurse from './Nurse.js';
+import Receptionist from './Receptionist.js';
+import Cashier from './Cashier.js';
+import Queue from './queue.js';
+import { Patient } from './Patient.js';
 
 // Define models
 const models = {
@@ -14,6 +16,8 @@ const models = {
   Nurse,
   Receptionist,
   Cashier,
+  Queue,
+  Patient,
 };
 
 // Associate models
@@ -23,13 +27,13 @@ Object.keys(models).forEach((modelName) => {
   }
 });
 
-// Sync database
+
 (async () => {
   try {
-    await sequelize.sync({ alter: true }); // or { force: true } if you want to drop and recreate tables
-    console.log("Database synced successfully.");
+    await sequelize.sync({ alter: true }); // Use `alter: true` to update the schema
+    console.log('Database synced successfully.');
   } catch (error) {
-    console.error("Error syncing database:", error);
+    console.error('Error syncing database:', error);
   }
 })();
 

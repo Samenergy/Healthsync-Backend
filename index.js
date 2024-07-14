@@ -1,12 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import bodyParser from "body-parser";
-
+import userRoutes from "./routes/userRoutes.js";
 import sequelize from "./config/database.js";
 import authRoutes from "./routes/AuthRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
-
+import queueRoutes from "./routes/queue.js";
 dotenv.config();
 
 const corsOptions = {
@@ -26,6 +25,8 @@ app.use(express.urlencoded({ extended: true })); // Parses incoming URL-encoded 
 // Define routes
 app.use("/api", authRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/queue", queueRoutes);
 app.get("/test", (req, res) => {
   res.json({ message: "Server is running" });
 });
@@ -34,7 +35,7 @@ app.get("/test", (req, res) => {
 (async () => {
   try {
     // Sync database
-    await sequelize.sync({ alter: true });
+    await sequelize.sync();
     console.log("Database synced successfully.");
 
     // Start the Express server

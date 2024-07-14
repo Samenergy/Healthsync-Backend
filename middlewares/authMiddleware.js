@@ -1,30 +1,28 @@
-import jwt from "jsonwebtoken";
-import Administrator from "../models/administrator.js";
-import dotenv from "dotenv";
 
-dotenv.config();
+import jwt from 'jsonwebtoken';
+import { models } from '../models/index.js';
+
 const authMiddleware = async (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
+  const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
-    return res.status(401).json({ error: "No token provided" });
+    return res.status(401).json({ error: 'No token provided' });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); 
-    const admin = await Administrator.findByPk(decoded.id, {
-      include: "Hospital",
-    });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (!admin) {
-      return res.status(404).json({ error: "Admin not found" });
+    const user = await models[decoded.role.charAt(0).toUpperCase() + decoded.role.slice(1)].findByPk(decoded.id);
+
+    if (!user) {
+      return res.status(401).json({ error: 'User not found' });
     }
 
-    req.admin = admin; // Attach admin info to the request
-    req.hospitalId = admin.hospitalId; // Attach hospital ID to the request
+    req.user = { ...user.toJSON(), role: decoded.role }; // Include role in the user object
     next();
   } catch (error) {
-    res.status(401).json({ error: "Invalid token" });
+    console.error('Authentication error:', error);
+    res.status(401).json({ error: 'Invalid token' });
   }
 };
 

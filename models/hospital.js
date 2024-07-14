@@ -1,3 +1,5 @@
+// models/hospital.js
+
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
@@ -33,6 +35,7 @@ Hospital.associate = (models) => {
   Hospital.hasMany(models.Nurse, { foreignKey: 'hospitalId' });
   Hospital.hasMany(models.Receptionist, { foreignKey: 'hospitalId' });
   Hospital.hasMany(models.Cashier, { foreignKey: 'hospitalId' });
+  Hospital.hasMany(models.Queue, { foreignKey: 'hospitalId' });  // Ensure Queue is properly defined and imported
 };
 
 export default Hospital;
