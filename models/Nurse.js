@@ -2,20 +2,32 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 import Hospital from './hospital.js';
 import bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 
 const Nurse = sequelize.define(
   'Nurse',
   {
-    nurseId: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    nurseId: {
+      type: DataTypes.UUID,
+      defaultValue: () => uuidv4().slice(0, 6), // Generate a UUID and slice the first 6 characters
+      primaryKey: true,
+    },
     hospitalId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       references: { model: Hospital, key: 'hospitalId' },
     },
     name: DataTypes.STRING,
-    email: DataTypes.STRING,
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true, // Ensure email is unique
+    },
     phoneNumber: DataTypes.STRING,
     field: DataTypes.STRING,
-    password: DataTypes.STRING,
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     picture: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -33,11 +45,5 @@ Nurse.associate = (models) => {
 Nurse.prototype.validPassword = async function (password) {
   return bcrypt.compare(password, this.password);
 };
-
-Nurse.beforeCreate(async (nurse) => {
-  if (nurse.password) {
-    nurse.password = await bcrypt.hash(nurse.password, 10);
-  }
-});
 
 export default Nurse;

@@ -123,7 +123,7 @@ export const addUser = async (req, res) => {
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-
+    console.log("Hashed Password", hashedPassword);
     let newUser;
     switch (role) {
       case "Administrator":

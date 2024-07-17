@@ -64,6 +64,7 @@ const login = async (req, res) => {
     }
 
     const isPasswordValid = await user.validPassword(password);
+    
 
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid email or password" });
@@ -92,3 +93,8 @@ const login = async (req, res) => {
 };
 
 export { login };
+const logout = (req, res) => {
+  res.json({ message: "Logout successful" });
+};
+
+export { logout };

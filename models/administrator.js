@@ -2,14 +2,24 @@ import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 import Hospital from "./hospital.js";
 import bcrypt from "bcrypt";
+import { v4 as uuidv4 } from "uuid";
 
 const Administrator = sequelize.define(
   "Administrator",
   {
-    adminId: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    adminId: {
+      type: DataTypes.UUID,
+      defaultValue: () => uuidv4(),  // Generate a full UUID
+      primaryKey: true,
+    },
     hospitalId: {
-      type: DataTypes.INTEGER,
-      references: { model: Hospital, key: "hospitalId" },
+      type: DataTypes.UUID,
+      references: {
+        model: Hospital,
+        key: 'hospitalId',
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     },
     name: {
       type: DataTypes.STRING,
@@ -18,7 +28,7 @@ const Administrator = sequelize.define(
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true, // Ensure this is not duplicated
+      unique: true,  // Ensure email is unique
     },
     password: {
       type: DataTypes.STRING,

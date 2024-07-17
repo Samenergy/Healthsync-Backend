@@ -18,12 +18,30 @@ export const getUserData = async (req, res) => {
       picture: user.picture,
     };
 
-    if (user.role === "administrator") {
-      const hospital = await models.Hospital.findByPk(user.hospitalId);
-      if (!hospital) {
-        return res.status(404).json({ error: "Hospital not found" });
-      }
+    // Fetch hospital details based on user role
+    const hospital = await models.Hospital.findByPk(user.hospitalId, {
+      attributes: [
+        "hospitalId",
+        "hospitalName",
+        "address",
+        "facilityType",
+        "email",
+        "phoneNumber",
+        "taxIdNumber",
+        "businessRegistrationNumber",
+        "country",
+        "province",
+        "district",
+        "sector",
+        "logo",
+      ],
+    });
 
+    if (!hospital) {
+      return res.status(404).json({ error: "Hospital not found" });
+    }
+
+    if (user.role === "administrator") {
       res.status(200).json({
         user: userData,
         hospital: {
@@ -43,26 +61,14 @@ export const getUserData = async (req, res) => {
         },
       });
     } else {
-      const hospital = await models.Hospital.findByPk(user.hospitalId, {
-        attributes: ["hospitalName", "logo"], // Only get name and logo
-      });
-      if (!hospital) {
-        return res.status(404).json({ error: "Hospital not found" });
-      }
-
-      if (user.role === "cashier" || user.role === "receptionist") {
-        userData.responsibilities = user.responsibilities;
-      } else if (user.role === "nurse") {
-        userData.field = user.field;
-      } else if (user.role === "doctor") {
-        userData.specialization = user.specialization;
-      }
-
+      // Filter out attributes for non-administrators
       res.status(200).json({
         user: userData,
         hospital: {
+          id: hospital.hospitalId,
           name: hospital.hospitalName,
           logo: hospital.logo,
+          facilityType: hospital.facilityType,
         },
       });
     }

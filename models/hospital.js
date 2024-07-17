@@ -1,20 +1,22 @@
-// models/hospital.js
-
-import { DataTypes } from 'sequelize';
-import sequelize from '../config/database.js';
+import { DataTypes } from "sequelize";
+import sequelize from "../config/database.js";
+import { v4 as uuidv4 } from "uuid";
 
 const Hospital = sequelize.define(
-  'Hospital',
+  "Hospital",
   {
     hospitalId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-      autoIncrement: true,
     },
     hospitalName: DataTypes.STRING,
     address: DataTypes.STRING,
     facilityType: DataTypes.STRING,
-    email: DataTypes.STRING,
+    email: {
+      type: DataTypes.STRING,
+      unique: true, // Ensure email is unique
+    },
     phoneNumber: DataTypes.STRING,
     taxIdNumber: DataTypes.STRING,
     businessRegistrationNumber: DataTypes.STRING,
@@ -26,16 +28,18 @@ const Hospital = sequelize.define(
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   },
-  {}
+  {
+    timestamps: true,
+  }
 );
 
 Hospital.associate = (models) => {
-  Hospital.hasMany(models.Administrator, { foreignKey: 'hospitalId' });
-  Hospital.hasMany(models.Doctor, { foreignKey: 'hospitalId' });
-  Hospital.hasMany(models.Nurse, { foreignKey: 'hospitalId' });
-  Hospital.hasMany(models.Receptionist, { foreignKey: 'hospitalId' });
-  Hospital.hasMany(models.Cashier, { foreignKey: 'hospitalId' });
-  Hospital.hasMany(models.Queue, { foreignKey: 'hospitalId' });  // Ensure Queue is properly defined and imported
+  Hospital.hasMany(models.Administrator, { foreignKey: "hospitalId" });
+  Hospital.hasMany(models.Doctor, { foreignKey: "hospitalId" });
+  Hospital.hasMany(models.Nurse, { foreignKey: "hospitalId" });
+  Hospital.hasMany(models.Receptionist, { foreignKey: "hospitalId" });
+  Hospital.hasMany(models.Cashier, { foreignKey: "hospitalId" });
+  Hospital.hasMany(models.Queue, { foreignKey: "hospitalId" });
 };
 
 export default Hospital;

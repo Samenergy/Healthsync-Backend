@@ -1,29 +1,20 @@
-// src/models.js
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database.js';
+import { v4 as uuidv4 } from 'uuid';
 
-import { Sequelize, DataTypes } from "sequelize";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const sequelize = new Sequelize({
-  host: process.env.DB_HOST,
-  username: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-  dialect: "mysql",
-  logging: false, // Turn off logging for production
-});
-
-// Define the Patient model
 const Patient = sequelize.define(
-  "Patient",
+  'Patient',
   {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: () => uuidv4(),  // Generate a UUID
+      primaryKey: true,
+    },
     name: { type: DataTypes.STRING, allowNull: false },
     dob: { type: DataTypes.DATE, allowNull: false },
     age: { type: DataTypes.INTEGER, allowNull: false },
     gender: {
-      type: DataTypes.ENUM("Male", "Female", "Other"),
+      type: DataTypes.ENUM('Male', 'Female', 'Other'),
       allowNull: false,
     },
     height: { type: DataTypes.STRING },
@@ -43,14 +34,14 @@ const Patient = sequelize.define(
     insurance: { type: DataTypes.STRING },
     socialHistory: { type: DataTypes.TEXT },
     consentForms: {
-      type: DataTypes.ENUM("Signed", "Not Signed"),
+      type: DataTypes.ENUM('Signed', 'Not Signed'),
       allowNull: false,
     },
-    image: { type: DataTypes.BLOB("long") }, // Changed to 'long' for large binary data
+    image: { type: DataTypes.BLOB('long') }, // Changed to 'long' for large binary data
   },
   {
-    timestamps: false,
+    timestamps: true, // Include timestamps for createdAt and updatedAt
   }
 );
 
-export { sequelize, Patient };
+export { Patient };
