@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import { models } from "../models/index.js";
 import path from "path";
 import { Patient } from "../models/Patient.js";
-
+import { ValidationError as SequelizeValidationError } from 'sequelize';
 export const getUserData = async (req, res) => {
   try {
     const user = req.user; // Retrieved from authMiddleware
@@ -195,6 +195,77 @@ export const getAllPatients = async (req, res) => {
   } catch (error) {
     console.error("Failed to get all patients:", error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const addPatient = async (req, res) => {
+  try {
+    const {
+      name,
+      dob,
+      gender,
+      bloodtype,
+      contact,
+      emergencyContact,
+      allergies,
+      insurance,
+      email,
+    } = req.body;
+
+    // Validate required fields
+    if (!name || !dob || !gender) {
+      return res
+        .status(400)
+        .json({ error: "Name, Date of Birth, and Gender are required." });
+    }
+
+    // Check if a patient with the same name, dob, and gender already exists
+    const existingPatient = await Patient.findOne({
+      where: {
+        name,
+        dob,
+        gender,
+      },
+    });
+
+    if (existingPatient) {
+      return res
+        .status(409)
+        .json({
+          error:
+            "Patient with the same name, Date of Birth, and Gender already exists.",
+        });
+    }
+
+    // Create a new patient record
+    const newPatient = await Patient.create({
+      name,
+      dob,
+      gender,
+      bloodtype,
+      contact,
+      emergencyContact,
+      allergies,
+      insurance,
+      email,
+    });
+
+    // Respond with the created patient data
+    return res.status(201).json(newPatient);
+  } catch (error) {
+    // Handle specific Sequelize validation error for unique constraint
+    if (error instanceof SequelizeValidationError) {
+      const uniqueEmailError = error.errors.find((e) => e.path === "email");
+      if (uniqueEmailError) {
+        return res.status(409).json({ error: "Email already in use." });
+      }
+    }
+
+    // Log the error for debugging
+    console.error("Error adding patient:", error);
+
+    // Respond with a generic internal server error
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 export const getPatientById = async (req, res) => {

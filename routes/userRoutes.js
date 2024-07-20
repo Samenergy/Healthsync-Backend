@@ -7,6 +7,7 @@ import {
   changeUserPassword,
   getAllPatients,
   getPatientById,
+  addPatient,
 } from "../controllers/userController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
@@ -24,8 +25,9 @@ router.put(
   ]),
   updateUserData
 ); // Auth middleware applied here
-router.put("/change-password", authMiddleware, changeUserPassword); // Auth middleware applied here
-router.get("/patients", getAllPatients); // No auth middleware applied here (public route)
-router.get("/patients/:id", getPatientById); // No auth middleware applied here (public route)
+router.put("/change-password", authMiddleware, changeUserPassword);
+router.post("/patients", authMiddleware, addPatient); // Auth middleware applied here
+router.get("/patients", authMiddleware, getAllPatients); // No auth middleware applied here (public route)
+router.get("/patients/:id", authMiddleware, getPatientById); // No auth middleware applied here (public route)
 
 export default router;
