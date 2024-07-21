@@ -1,7 +1,7 @@
 // controllers/queueController.js
 import Queue from "../models/queue.js";
 import { Patient } from "../models/Patient.js";
-
+import Doctor from "../models/Doctor.js";
 export const getQueueForHospital = async (req, res) => {
   try {
     const queue = await Queue.findAll({
@@ -53,5 +53,43 @@ export const deleteFromQueue = async (req, res) => {
   } catch (error) {
     console.error("Failed to delete queue entry:", error);
     res.status(500).json({ message: "Failed to delete queue entry" });
+  }
+};
+export const doctorsPatients = async (req, res) => {
+  const doctorId = req.params.doctorId;
+
+  try {
+    // Fetch the doctor's specialty
+    const doctor = await Doctor.findByPk(doctorId);
+    if (!doctor) {
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
+
+    const doctorSpecialization = doctor.specialization;
+
+    // Fetch queues where the doctor specialization matches the queue's doctor field
+    const queues = await Queue.findAll({
+      where: { doctor: doctorSpecialization },
+      include: [
+        {
+          model: Patient,
+          attributes: ['id', 'name', 'gender', 'dob', 'contact'], // Adjust attributes if necessary
+        },
+        {
+          model: Doctor,
+          attributes: [], // Exclude doctor attributes if not needed
+        }
+      ],
+      order: [['createdAt', 'ASC']],
+    });
+
+    if (queues.length === 0) {
+      return res.status(404).json({ message: 'No patients found for this doctor.' });
+    }
+
+    res.status(200).json(queues);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
   }
 };

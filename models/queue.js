@@ -48,6 +48,7 @@ const Queue = sequelize.define(
 Queue.associate = (models) => {
   Queue.belongsTo(models.Patient, { foreignKey: 'patientId' });
   Queue.belongsTo(models.Hospital, { foreignKey: 'hospitalId' });
+  Queue.belongsTo(models.Doctor, { foreignKey: 'doctorId' });
 };
 
 export default Queue;
