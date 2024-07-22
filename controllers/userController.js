@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import { models } from "../models/index.js";
 import path from "path";
 import { Patient } from "../models/Patient.js";
-import { ValidationError as SequelizeValidationError } from 'sequelize';
+import { ValidationError as SequelizeValidationError } from "sequelize";
 export const getUserData = async (req, res) => {
   try {
     const user = req.user; // Retrieved from authMiddleware
@@ -11,6 +11,7 @@ export const getUserData = async (req, res) => {
       return res.status(401).json({ error: "User not found" });
     }
 
+    // Prepare user data
     let userData = {
       id: user.id,
       name: user.name,
@@ -41,9 +42,10 @@ export const getUserData = async (req, res) => {
       return res.status(404).json({ error: "Hospital not found" });
     }
 
+    // Return different responses based on user role
     if (user.role === "administrator") {
       res.status(200).json({
-        user: userData,
+        user: { ...userData, id: user.adminId }, // Assuming adminId is the field for Administrator
         hospital: {
           id: hospital.hospitalId,
           name: hospital.hospitalName,
@@ -60,8 +62,47 @@ export const getUserData = async (req, res) => {
           logo: hospital.logo,
         },
       });
+    } else if (user.role === "cashier") {
+      res.status(200).json({
+        user: { ...userData, id: user.cashierId }, // Assuming cashierId is the field for Cashier
+        hospital: {
+          id: hospital.hospitalId,
+          name: hospital.hospitalName,
+          logo: hospital.logo,
+          facilityType: hospital.facilityType,
+        },
+      });
+    } else if (user.role === "doctor") {
+      res.status(200).json({
+        user: { ...userData, id: user.doctorId }, // Assuming doctorId is the field for Doctor
+        hospital: {
+          id: hospital.hospitalId,
+          name: hospital.hospitalName,
+          logo: hospital.logo,
+          facilityType: hospital.facilityType,
+        },
+      });
+    } else if (user.role === "nurse") {
+      res.status(200).json({
+        user: { ...userData, id: user.nurseId }, // Assuming nurseId is the field for Nurse
+        hospital: {
+          id: hospital.hospitalId,
+          name: hospital.hospitalName,
+          logo: hospital.logo,
+          facilityType: hospital.facilityType,
+        },
+      });
+    } else if (user.role === "receptionist") {
+      res.status(200).json({
+        user: { ...userData, id: user.receptionistId }, // Assuming receptionistId is the field for Receptionist
+        hospital: {
+          id: hospital.hospitalId,
+          name: hospital.hospitalName,
+          logo: hospital.logo,
+          facilityType: hospital.facilityType,
+        },
+      });
     } else {
-      // Filter out attributes for non-administrators
       res.status(200).json({
         user: userData,
         hospital: {
@@ -229,12 +270,10 @@ export const addPatient = async (req, res) => {
     });
 
     if (existingPatient) {
-      return res
-        .status(409)
-        .json({
-          error:
-            "Patient with the same name, Date of Birth, and Gender already exists.",
-        });
+      return res.status(409).json({
+        error:
+          "Patient with the same name, Date of Birth, and Gender already exists.",
+      });
     }
 
     // Create a new patient record

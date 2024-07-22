@@ -7,7 +7,9 @@ import Receptionist from "./Receptionist.js";
 import Cashier from "./Cashier.js";
 import Queue from "./queue.js";
 import { Patient } from "./Patient.js";
-
+import { MedicalRecord } from "./MedicalRecord.js";
+import { Medication } from './Medication.js';
+import { MedicalRecordImage } from './MedicalRecordImage.js';
 // Define models
 const models = {
   Hospital,
@@ -18,9 +20,12 @@ const models = {
   Cashier,
   Queue,
   Patient,
+  MedicalRecord,
+  Medication,
+  MedicalRecordImage,
 };
-
-// Associate models
+Patient.hasMany(MedicalRecord, { foreignKey: "patientId" });
+MedicalRecord.belongsTo(Patient, { foreignKey: "patientId" });
 Object.keys(models).forEach((modelName) => {
   if (models[modelName].associate) {
     models[modelName].associate(models);
