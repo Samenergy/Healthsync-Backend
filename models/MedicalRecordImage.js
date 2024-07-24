@@ -15,7 +15,7 @@ const MedicalRecordImage = sequelize.define('MedicalRecordImage', {
   },
   image: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
 }, {
   timestamps: false,

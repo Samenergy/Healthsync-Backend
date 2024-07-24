@@ -1,8 +1,12 @@
 import bcrypt from "bcrypt";
 import { models } from "../models/index.js";
-import path from "path";
 import { Patient } from "../models/Patient.js";
+import { MedicalRecord } from "../models/MedicalRecord.js";
 import { ValidationError as SequelizeValidationError } from "sequelize";
+import { Medication } from "../models/Medication.js";
+import { MedicalRecordImage } from "../models/MedicalRecordImage.js";
+import multer from "multer";
+import path from "path";
 export const getUserData = async (req, res) => {
   try {
     const user = req.user; // Retrieved from authMiddleware
@@ -321,5 +325,235 @@ export const getPatientById = async (req, res) => {
   } catch (error) {
     console.error("Failed to get patient by ID:", error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}_${file.originalname}`);
+  },
+});
+
+const upload = multer({ storage });
+
+export const addMedicalRecord = async (req, res) => {
+  try {
+    const {
+      patientId,
+      date,
+      description,
+      status,
+      disease,
+      details,
+      notes,
+      height,
+      weight,
+      bmi,
+      bloodPressure,
+      immunizations,
+      insurance,
+      socialHistory,
+      doctorname, // Added field
+      Hospitalname, // Added field
+      medications, // Array of medication objects
+      images, // Array of image objects
+    } = req.body;
+
+    // Check if patient exists
+    const patient = await Patient.findByPk(patientId);
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    // Create a new medical record
+    const newRecord = await MedicalRecord.create({
+      patientId,
+      date,
+      description,
+      status,
+      disease,
+      details,
+      notes,
+      height,
+      weight,
+      bmi,
+      bloodPressure,
+      immunizations,
+      insurance,
+      socialHistory,
+      doctorname,
+      Hospitalname,
+    });
+
+    // Add related medications
+    if (medications && medications.length > 0) {
+      await Promise.all(
+        medications.map((medication) =>
+          Medication.create({ ...medication, medicalRecordId: newRecord.id })
+        )
+      );
+    }
+
+    // Add related images
+    if (images && images.length > 0) {
+      await Promise.all(
+        images.map((image) =>
+          MedicalRecordImage.create({ ...image, medicalRecordId: newRecord.id })
+        )
+      );
+    }
+
+    res.status(201).json(newRecord);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to create medical record" });
+  }
+};
+
+export const getPatientMedicalRecords = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+
+    // Fetch all medical records for the patient
+    const records = await MedicalRecord.findAll({
+      where: { patientId },
+      include: [
+        {
+          model: Medication,
+          attributes: ["id", "medication"], // Include relevant medication attributes
+        },
+        {
+          model: MedicalRecordImage,
+          attributes: ["id", "image"], // Include relevant image attributes
+        },
+      ],
+      attributes: [
+        "id",
+        "date",
+        "description",
+        "status",
+        "disease",
+        "details",
+        "notes",
+        "height",
+        "weight",
+        "bmi",
+        "bloodPressure",
+        "immunizations",
+        "insurance",
+        "socialHistory",
+        "doctorname",
+        "Hospitalname",
+      ],
+    });
+
+    if (records.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No medical records found for this patient" });
+    }
+
+    res.status(200).json(records);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to retrieve medical records" });
+  }
+};
+export const updateMedicalRecord = async (req, res) => {
+  try {
+    const { recordId } = req.params; // ID of the record to be updated
+    const {
+      date,
+      description,
+      status,
+      disease,
+      details,
+      notes,
+      height,
+      weight,
+      bmi,
+      bloodPressure,
+      immunizations,
+      insurance,
+      socialHistory,
+      doctorname,
+      Hospitalname,
+      medications, // Array of medication objects
+      images, // Array of image objects
+    } = req.body;
+
+    // Find the medical record by ID
+    const medicalRecord = await MedicalRecord.findByPk(recordId);
+
+    if (!medicalRecord) {
+      return res.status(404).json({ message: "Medical record not found" });
+    }
+
+    // Update the medical record
+    await medicalRecord.update({
+      date,
+      description,
+      status,
+      disease,
+      details,
+      notes,
+      height,
+      weight,
+      bmi,
+      bloodPressure,
+      immunizations,
+      insurance,
+      socialHistory,
+      doctorname,
+      Hospitalname,
+    });
+
+    // Update related medications
+    if (medications && medications.length > 0) {
+      await Promise.all(
+        medications.map(async (medication) => {
+          const existingMedication = await Medication.findOne({
+            where: { medicalRecordId: recordId, id: medication.id },
+          });
+
+          if (existingMedication) {
+            await existingMedication.update(medication);
+          } else {
+            await Medication.create({
+              ...medication,
+              medicalRecordId: recordId,
+            });
+          }
+        })
+      );
+    }
+
+    // Update related images
+    if (images && images.length > 0) {
+      await Promise.all(
+        images.map(async (image) => {
+          const existingImage = await MedicalRecordImage.findOne({
+            where: { medicalRecordId: recordId, id: image.id },
+          });
+
+          if (existingImage) {
+            await existingImage.update(image);
+          } else {
+            await MedicalRecordImage.create({
+              ...image,
+              medicalRecordId: recordId,
+            });
+          }
+        })
+      );
+    }
+
+    res.status(200).json({ message: "Medical record updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to update medical record" });
   }
 };

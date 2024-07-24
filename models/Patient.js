@@ -32,7 +32,7 @@ const Patient = sequelize.define(
     },
   },
   {
-    timestamps: true, // Include timestamps for createdAt and updatedAt
+    timestamps: true, 
   }
 );
 

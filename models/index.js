@@ -10,6 +10,7 @@ import { Patient } from "./Patient.js";
 import { MedicalRecord } from "./MedicalRecord.js";
 import { Medication } from './Medication.js';
 import { MedicalRecordImage } from './MedicalRecordImage.js';
+import { setupAssociations } from "./associations.js";
 // Define models
 const models = {
   Hospital,
@@ -24,6 +25,7 @@ const models = {
   Medication,
   MedicalRecordImage,
 };
+setupAssociations();
 Patient.hasMany(MedicalRecord, { foreignKey: "patientId" });
 MedicalRecord.belongsTo(Patient, { foreignKey: "patientId" });
 Object.keys(models).forEach((modelName) => {

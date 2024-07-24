@@ -8,6 +8,9 @@ import {
   getAllPatients,
   getPatientById,
   addPatient,
+  addMedicalRecord,
+  getPatientMedicalRecords,
+  updateMedicalRecord,
 } from "../controllers/userController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
@@ -26,8 +29,11 @@ router.put(
   updateUserData
 ); // Auth middleware applied here
 router.put("/change-password", authMiddleware, changeUserPassword);
-router.post("/patients", authMiddleware, addPatient); // Auth middleware applied here
-router.get("/patients", authMiddleware, getAllPatients); // No auth middleware applied here (public route)
-router.get("/patients/:id", authMiddleware, getPatientById); // No auth middleware applied here (public route)
+router.post("/patients", authMiddleware, addPatient);
+router.get("/patients", authMiddleware, getAllPatients);
+router.get("/patients/:id", authMiddleware, getPatientById);
+router.post("/records", authMiddleware, addMedicalRecord);
+router.put("/records/:recordId", authMiddleware, updateMedicalRecord);
+router.get("/records/:patientId", authMiddleware, getPatientMedicalRecords);
 
 export default router;
