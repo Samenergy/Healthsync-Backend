@@ -1,21 +1,21 @@
-import { DataTypes } from 'sequelize';
-import sequelize from '../config/database.js';
-import { v4 as uuidv4 } from 'uuid';
+import { DataTypes } from "sequelize";
+import sequelize from "../config/database.js";
+import { v4 as uuidv4 } from "uuid";
 
 const Queue = sequelize.define(
-  'Queue',
+  "Queue",
   {
     id: {
       type: DataTypes.UUID,
-      defaultValue: () => uuidv4().slice(0, 6),  // Generate a UUID and slice the first 6 characters
+      defaultValue: () => uuidv4().slice(0, 6), // Generate a UUID and slice the first 6 characters
       primaryKey: true,
     },
     patientId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: 'Patients',
-        key: 'id',
+        model: "Patients",
+        key: "id",
       },
     },
     doctor: {
@@ -26,17 +26,28 @@ const Queue = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    services: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      get() {
+        const rawValue = this.getDataValue('services');
+        return rawValue ? JSON.parse(rawValue) : [];
+      },
+      set(value) {
+        this.setDataValue('services', JSON.stringify(value));
+      }
+    },
     status: {
       type: DataTypes.STRING,
-      defaultValue: 'waiting',  // Possible values: 'waiting', 'in-progress', 'completed'
+      defaultValue: "waiting", // Possible values: 'waiting', 'in-progress', 'completed'
       allowNull: false,
     },
     hospitalId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: 'Hospitals',
-        key: 'hospitalId',
+        model: "Hospitals",
+        key: "hospitalId",
       },
     },
   },
@@ -46,9 +57,9 @@ const Queue = sequelize.define(
 );
 
 Queue.associate = (models) => {
-  Queue.belongsTo(models.Patient, { foreignKey: 'patientId' });
-  Queue.belongsTo(models.Hospital, { foreignKey: 'hospitalId' });
-  Queue.belongsTo(models.Doctor, { foreignKey: 'doctorId' });
+  Queue.belongsTo(models.Patient, { foreignKey: "patientId" });
+  Queue.belongsTo(models.Hospital, { foreignKey: "hospitalId" });
+  Queue.belongsTo(models.Doctor, { foreignKey: "doctorId" });
 };
 
 export default Queue;

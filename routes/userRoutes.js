@@ -18,7 +18,7 @@ const upload = multer({ dest: "uploads/" });
 
 const router = express.Router();
 
-router.get("/data", authMiddleware, getUserData); // Auth middleware applied here
+router.get("/data", authMiddleware, getUserData);
 router.put(
   "/update",
   authMiddleware,
@@ -27,7 +27,7 @@ router.put(
     { name: "hospital_logo", maxCount: 1 },
   ]),
   updateUserData
-); // Auth middleware applied here
+); 
 router.put("/change-password", authMiddleware, changeUserPassword);
 router.post("/patients", authMiddleware, addPatient);
 router.get("/patients", authMiddleware, getAllPatients);

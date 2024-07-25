@@ -63,6 +63,7 @@ const MedicalRecord = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false, 
     },
+  
     socialHistory: {
       type: DataTypes.TEXT,
       allowNull: true, 
