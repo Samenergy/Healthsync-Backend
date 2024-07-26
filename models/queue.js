@@ -30,12 +30,12 @@ const Queue = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
       get() {
-        const rawValue = this.getDataValue('services');
+        const rawValue = this.getDataValue("services");
         return rawValue ? JSON.parse(rawValue) : [];
       },
       set(value) {
-        this.setDataValue('services', JSON.stringify(value));
-      }
+        this.setDataValue("services", JSON.stringify(value));
+      },
     },
     status: {
       type: DataTypes.STRING,
@@ -50,6 +50,29 @@ const Queue = sequelize.define(
         key: "hospitalId",
       },
     },
+    doctorId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: "Doctors", // Ensure this matches the actual model name
+        key: "doctorId", // This should match the primary key field in the Doctors model
+      },
+    },
+    amounts: {
+      type: DataTypes.TEXT, // Change to TEXT for MySQL compatibility
+      allowNull: true,
+      defaultValue: JSON.stringify({
+        Patient: "",
+        Assurance: "",
+      }),
+      get() {
+        const rawValue = this.getDataValue("amounts");
+        return rawValue ? JSON.parse(rawValue) : { Patient: "", Assurance: "" };
+      },
+      set(value) {
+        this.setDataValue("amounts", JSON.stringify(value));
+      },
+    },
   },
   {
     timestamps: true,
@@ -59,7 +82,7 @@ const Queue = sequelize.define(
 Queue.associate = (models) => {
   Queue.belongsTo(models.Patient, { foreignKey: "patientId" });
   Queue.belongsTo(models.Hospital, { foreignKey: "hospitalId" });
-  Queue.belongsTo(models.Doctor, { foreignKey: "doctorId" });
+  Queue.belongsTo(models.Doctor, { foreignKey: "doctorId" }); // Ensure Doctor model is imported and associated correctly
 };
 
 export default Queue;
