@@ -2,10 +2,17 @@
 import Queue from "../models/queue.js";
 import { Patient } from "../models/Patient.js";
 import Doctor from "../models/Doctor.js";
+// controllers/queueController.js
+
 export const getQueueForHospital = async (req, res) => {
+  const { hospitalId } = req.params;
+
   try {
     const waitingQueue = await Queue.findAll({
-      where: { status: "waiting" },
+      where: {
+        status: "waiting",
+        hospitalId: hospitalId,
+      },
       include: {
         model: Patient,
         attributes: ["name", "gender", "dob", "contact"],
@@ -18,28 +25,22 @@ export const getQueueForHospital = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch the waiting queue data" });
   }
 };
-export const getCompletedQueueForHospital = async (req, res) => {
-  try {
-    const completedQueue = await Queue.findAll({
-      where: { status: "completed" },
-      include: {
-        model: Patient,
-        attributes: ["name", "gender", "dob", "contact"],
-      },
-    });
 
-    res.status(200).json(completedQueue);
-  } catch (error) {
-    console.error("Failed to fetch the completed queue data:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to fetch the completed queue data" });
-  }
-};
+// controllers/queueController.js
+
 export const getInProgressQueue = async (req, res) => {
+  const { hospitalId } = req.params;
+
   try {
+    if (!hospitalId) {
+      return res.status(400).json({ message: "Hospital ID is required" });
+    }
+
     const inProgressQueue = await Queue.findAll({
-      where: { status: "in progress" },
+      where: {
+        status: "in progress",
+        hospitalId,
+      },
       include: {
         model: Patient,
         attributes: ["name", "gender", "dob", "contact"],
@@ -54,6 +55,35 @@ export const getInProgressQueue = async (req, res) => {
       .json({ message: "Failed to fetch the in-progress queue data" });
   }
 };
+
+export const getCompletedQueueForHospital = async (req, res) => {
+  const { hospitalId } = req.params;
+
+  try {
+    if (!hospitalId) {
+      return res.status(400).json({ message: "Hospital ID is required" });
+    }
+
+    const completedQueues = await Queue.findAll({
+      where: {
+        hospitalId,
+        status: "completed",
+      },
+      include: {
+        model: Patient,
+        attributes: ["name", "gender", "dob", "contact"],
+      },
+    });
+
+    return res.status(200).json(completedQueues);
+  } catch (error) {
+    console.error("Error fetching completed queues:", error);
+    return res
+      .status(500)
+      .json({ message: "Error fetching completed queues", error });
+  }
+};
+
 export const addToQueue = async (req, res) => {
   try {
     const { patientId, doctor, assurance, hospitalId } = req.body;
@@ -95,27 +125,30 @@ export const doctorsPatients = async (req, res) => {
   const doctorId = req.params.doctorId;
 
   try {
-    // Fetch the doctor's specialization
+    // Fetch the doctor and its associated hospital ID
     const doctor = await Doctor.findByPk(doctorId);
     if (!doctor) {
       return res.status(404).json({ message: "Doctor not found" });
     }
 
     const doctorSpecialization = doctor.specialization;
+    const hospitalId = doctor.hospitalId; // Fetch the hospital ID from the doctor record
 
+    // Fetch queues where the doctor's specialization matches and hospitalId matches
     const queues = await Queue.findAll({
       where: {
         doctor: doctorSpecialization,
-        status: "waiting", 
+        status: "waiting",
+        hospitalId: hospitalId, // Filter by hospital ID
       },
       include: [
         {
           model: Patient,
-          attributes: ["id", "name", "gender", "dob", "contact"], 
+          attributes: ["id", "name", "gender", "dob", "contact"],
         },
         {
           model: Doctor,
-          attributes: [], 
+          attributes: [],
         },
       ],
       order: [["createdAt", "ASC"]],
@@ -124,7 +157,10 @@ export const doctorsPatients = async (req, res) => {
     if (queues.length === 0) {
       return res
         .status(404)
-        .json({ message: "No waiting patients found for this doctor." });
+        .json({
+          message:
+            "No waiting patients found for this doctor in the same hospital.",
+        });
     }
 
     res.status(200).json(queues);
@@ -253,6 +289,11 @@ export const completedQueue = async (req, res) => {
     // Update the status to "completed"
     queueItem.status = "completed";
 
+    // Update amounts field if provided
+    if (req.body.amounts) {
+      queueItem.amounts = req.body.amounts;
+    }
+
     // Save changes
     await queueItem.save();
 
@@ -262,7 +303,7 @@ export const completedQueue = async (req, res) => {
       queueItem: {
         id: queueItem.id,
         status: queueItem.status,
-        amounts: queueItem.amounts, // Include amounts in the response
+        amounts: queueItem.amounts,
       },
     });
   } catch (error) {

@@ -21,6 +21,7 @@ export const getUserData = async (req, res) => {
       name: user.name,
       email: user.email,
       picture: user.picture,
+      role: user.role,
     };
 
     // Fetch hospital details based on user role
@@ -123,13 +124,69 @@ export const getUserData = async (req, res) => {
   }
 };
 
-export const updateUserData = async (req, res) => {
+export const updateUserProfile = async (req, res) => {
+  const { userType, userId } = req.params;
   const {
     name,
     email,
+    phoneNumber,
+    password,
+    specialization,
+    field,
+    responsibilities,
+  } = req.body;
+
+  // Get the model based on userType
+  const model = models[userType.charAt(0).toUpperCase() + userType.slice(1)];
+
+  if (!model) return res.status(400).json({ message: "Invalid user type" });
+
+  try {
+    const user = await model.findByPk(userId);
+    if (!user)
+      return res.status(404).json({ message: `${userType} not found` });
+
+    // Update user fields dynamically
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (phoneNumber) user.phoneNumber = phoneNumber;
+    if (password) user.password = await bcrypt.hash(password, 10);
+
+    // Handle file uploads
+    if (req.files) {
+      if (req.files.picture) {
+        const picturePath = path.join("uploads", req.files.picture[0].filename);
+        user.picture = picturePath; // Save the path to the profile picture
+      }
+      if (req.files.hospital_logo) {
+        const logoPath = path.join(
+          "uploads",
+          req.files.hospital_logo[0].filename
+        );
+        user.hospitalLogo = logoPath; // Save the path to the hospital logo
+      }
+    }
+
+    if (specialization && user.specialization !== undefined)
+      user.specialization = specialization;
+    if (field && user.field !== undefined) user.field = field;
+    if (responsibilities && user.responsibilities !== undefined)
+      user.responsibilities = responsibilities;
+
+    await user.save();
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating user profile", error });
+  }
+};
+
+export const updateHospitalInfo = async (req, res) => {
+  const { hospitalId } = req.params;
+  const {
     hospitalName,
     address,
     facilityType,
+    email,
     phoneNumber,
     taxIdNumber,
     businessRegistrationNumber,
@@ -140,66 +197,41 @@ export const updateUserData = async (req, res) => {
   } = req.body;
 
   try {
-    const user = req.user; // Retrieved from authMiddleware
-    const userPicture =
-      req.file && req.file.fieldname === "user_picture" ? req.file : null;
-    const hospitalLogo =
-      req.files && req.files["hospital_logo"]
-        ? req.files["hospital_logo"][0]
-        : null;
-
-    // Update user details
-    if (email) {
-      await models[
-        user.role.charAt(0).toUpperCase() + user.role.slice(1)
-      ].update({ email }, { where: { id: user.id } });
-    }
-    if (name) {
-      await models[
-        user.role.charAt(0).toUpperCase() + user.role.slice(1)
-      ].update({ name }, { where: { id: user.id } });
-    }
-    if (userPicture) {
-      await models[
-        user.role.charAt(0).toUpperCase() + user.role.slice(1)
-      ].update(
-        { picture: `/uploads/user/${userPicture.filename}` },
-        { where: { id: user.id } }
-      );
+    // Check if the user is an administrator
+    const admin = await models.Administrator.findByPk(req.user.id);
+    if (!admin) {
+      return res.status(403).json({ message: "Access denied. Only administrators can update hospital information." });
     }
 
-    if (user.role === "administrator") {
-      // Update hospital details
-      const hospital = await models.Hospital.findByPk(user.hospitalId);
-
-      if (!hospital) {
-        return res.status(404).json({ error: "Hospital not found" });
-      }
-
-      if (hospitalName) hospital.hospitalName = hospitalName;
-      if (address) hospital.address = address;
-      if (facilityType) hospital.facilityType = facilityType;
-      if (phoneNumber) hospital.phoneNumber = phoneNumber;
-      if (taxIdNumber) hospital.taxIdNumber = taxIdNumber;
-      if (businessRegistrationNumber)
-        hospital.businessRegistrationNumber = businessRegistrationNumber;
-      if (country) hospital.country = country;
-      if (province) hospital.province = province;
-      if (district) hospital.district = district;
-      if (sector) hospital.sector = sector;
-      if (hospitalLogo) {
-        hospital.logo = `/uploads/hospital/${hospitalLogo.filename}`;
-      }
-
-      await hospital.save();
+    // Find the hospital by ID
+    const hospital = await models.Hospital.findByPk(hospitalId);
+    if (!hospital) {
+      return res.status(404).json({ message: "Hospital not found" });
     }
 
-    res
-      .status(200)
-      .json({ message: "User and hospital data updated successfully" });
+    // Update hospital fields dynamically
+    if (hospitalName) hospital.hospitalName = hospitalName;
+    if (address) hospital.address = address;
+    if (facilityType) hospital.facilityType = facilityType;
+    if (email) hospital.email = email;
+    if (phoneNumber) hospital.phoneNumber = phoneNumber;
+    if (taxIdNumber) hospital.taxIdNumber = taxIdNumber;
+    if (businessRegistrationNumber) hospital.businessRegistrationNumber = businessRegistrationNumber;
+    if (country) hospital.country = country;
+    if (province) hospital.province = province;
+    if (district) hospital.district = district;
+    if (sector) hospital.sector = sector;
+
+    // Handle file uploads for hospital logo
+    if (req.files && req.files.logo) {
+      const logoPath = path.join("uploads", req.files.logo[0].filename);
+      hospital.logo = logoPath; // Save the path to the hospital logo
+    }
+
+    await hospital.save();
+    res.json(hospital);
   } catch (error) {
-    console.error("Failed to update user and hospital data:", error);
-    res.status(500).json({ error: "Failed to update user and hospital data" });
+    res.status(500).json({ message: "Error updating hospital information", error });
   }
 };
 

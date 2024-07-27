@@ -17,8 +17,8 @@ import {
 
 const router = express.Router();
 
-router.get("/", authMiddleware, getQueueForHospital);
-router.get("/inprogress", authMiddleware, getInProgressQueue);
+router.get("/:hospitalId", authMiddleware, getQueueForHospital);
+router.get("/in-progress/:hospitalId", authMiddleware, getInProgressQueue);
 router.post("/add", authMiddleware, addToQueue);
 router.delete("/:id", authMiddleware, deleteFromQueue);
 router.get("/doctor/:doctorId", authMiddleware, doctorsPatients);
@@ -27,5 +27,5 @@ router.put("/edit/:id", authMiddleware, editQueueEntry);
 router.get("/:id", authMiddleware, getQueueEntryById);
 router.get("/patient/:patientId", authMiddleware, getQueueByPatientId);
 router.patch("/:id/done", authMiddleware, completedQueue);
-router.get('/completed', getCompletedQueueForHospital);
+router.get("/completed/:hospitalId", authMiddleware, getCompletedQueueForHospital);
 export default router;

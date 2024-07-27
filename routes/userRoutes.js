@@ -1,9 +1,8 @@
-// routes/userRoutes.js
 import express from "express";
-import multer from "multer";
+import upload from "../config/multer.js";
 import {
   getUserData,
-  updateUserData,
+  updateUserProfile,
   changeUserPassword,
   getAllPatients,
   getPatientById,
@@ -11,29 +10,38 @@ import {
   addMedicalRecord,
   getPatientMedicalRecords,
   updateMedicalRecord,
+  updateHospitalInfo,
 } from "../controllers/userController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
-const upload = multer({ dest: "uploads/" });
-
 const router = express.Router();
 
+// User-related routes
 router.get("/data", authMiddleware, getUserData);
 router.put(
-  "/update",
+  "/:userType/:userId",
   authMiddleware,
   upload.fields([
-    { name: "user_picture", maxCount: 1 },
+    { name: "picture", maxCount: 1 },
     { name: "hospital_logo", maxCount: 1 },
   ]),
-  updateUserData
-); 
+  updateUserProfile
+);
 router.put("/change-password", authMiddleware, changeUserPassword);
-router.post("/patients", authMiddleware, addPatient);
+
+// Patient-related routes
 router.get("/patients", authMiddleware, getAllPatients);
+router.post("/patients", authMiddleware, addPatient);
 router.get("/patients/:id", authMiddleware, getPatientById);
+
+// Medical record-related routes
 router.post("/records", authMiddleware, addMedicalRecord);
 router.put("/records/:recordId", authMiddleware, updateMedicalRecord);
 router.get("/records/:patientId", authMiddleware, getPatientMedicalRecords);
-
+router.put(
+  "/hospital/:hospitalId",
+  authMiddleware,
+  upload.fields([{ name: "logo", maxCount: 1 }]),
+  updateHospitalInfo
+);
 export default router;
