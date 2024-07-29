@@ -8,7 +8,7 @@ import sequelize from "./config/database.js";
 import authRoutes from "./routes/AuthRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import queueRoutes from "./routes/queue.js";
-
+import reportRoutes from './routes/reportRoutes.js';
 dotenv.config();
 
 const corsOptions = {
@@ -37,6 +37,7 @@ app.use("/api", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/queue", queueRoutes);
+app.use('/api/report', reportRoutes);
 app.get("/test", (req, res) => {
   res.json({ message: "Server is running" });
 });

@@ -7,6 +7,41 @@ import { Medication } from "../models/Medication.js";
 import { MedicalRecordImage } from "../models/MedicalRecordImage.js";
 import multer from "multer";
 import path from "path";
+
+const { Administrator, Doctor, Nurse, Receptionist, Cashier } = models;
+
+export const allUsers = async (req, res) => {
+  const { hospitalId } = req.params;
+
+  try {
+    // Fetch all users related to the hospital
+    const [administrators, doctors, nurses, receptionists, cashiers] = await Promise.all([
+      Administrator.findAll({ where: { hospitalId } }),
+      Doctor.findAll({ where: { hospitalId } }),
+      Nurse.findAll({ where: { hospitalId } }),
+      Receptionist.findAll({ where: { hospitalId } }),
+      Cashier.findAll({ where: { hospitalId } })
+    ]);
+
+    // Combine all users into one array
+    const allUsers = {
+      administrators,
+      doctors,
+      nurses,
+      receptionists,
+      cashiers
+    };
+
+    res.status(200).json(allUsers);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+
+
+
 export const getUserData = async (req, res) => {
   try {
     const user = req.user; // Retrieved from authMiddleware

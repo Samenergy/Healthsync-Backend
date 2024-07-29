@@ -11,6 +11,7 @@ import {
   getPatientMedicalRecords,
   updateMedicalRecord,
   updateHospitalInfo,
+  allUsers,
 } from "../controllers/userController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
@@ -38,10 +39,12 @@ router.get("/patients/:id", authMiddleware, getPatientById);
 router.post("/records", authMiddleware, addMedicalRecord);
 router.put("/records/:recordId", authMiddleware, updateMedicalRecord);
 router.get("/records/:patientId", authMiddleware, getPatientMedicalRecords);
+
 router.put(
   "/hospital/:hospitalId",
   authMiddleware,
   upload.fields([{ name: "logo", maxCount: 1 }]),
   updateHospitalInfo
 );
+router.get("/hospital/:hospitalId/users", authMiddleware, allUsers);
 export default router;

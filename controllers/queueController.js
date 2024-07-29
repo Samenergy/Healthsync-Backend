@@ -2,6 +2,7 @@
 import Queue from "../models/queue.js";
 import { Patient } from "../models/Patient.js";
 import Doctor from "../models/Doctor.js";
+
 // controllers/queueController.js
 
 export const getQueueForHospital = async (req, res) => {
@@ -309,5 +310,57 @@ export const completedQueue = async (req, res) => {
   } catch (error) {
     console.error("Error updating queue status:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+export const getCompletedQueueByDoctorId = async (req, res) => {
+  const { doctorId } = req.params;
+
+  try {
+    const completedQueues = await Queue.findAll({
+      where: {
+        doctorId,
+        status: 'completed',
+      },
+      include: [
+        {
+          model: Patient,
+          attributes: ["name", "gender", "dob", "contact"]
+        }
+      ]
+    });
+
+    res.status(200).json(completedQueues);
+  } catch (error) {
+    console.error('Error fetching completed queues for doctor:', error);
+    res.status(500).json({ error: 'An error occurred while fetching the completed queues' });
+  }
+};
+export const getCompletedQueuesByHospital = async (req, res) => {
+  const { hospitalId } = req.params;
+
+  try {
+    const completedQueues = await Queue.findAll({
+      where: {
+        hospitalId,
+        status: 'completed'
+      },
+      include: [
+        {
+          model: Patient,
+          attributes: ["name", "gender", "dob", "contact"]
+        }
+      ]
+    });
+
+    if (completedQueues.length === 0) {
+      return res.status(404).json({ message: 'No completed queues found for this hospital.' });
+    }
+
+    res.json(completedQueues);
+  } catch (error) {
+    console.error('Error fetching completed queues:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
