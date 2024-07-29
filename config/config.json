@@ -1,25 +1,25 @@
 {
   "development": {
     "username": "root",
-    "password": "Kigali@123",
-    "database": "HealthSyncRwanda",
-    "host": "localhost",
+    "password": "ghxhXOVMUqCDwyyllFHPFbcsgtvnBwgz",
+    "database": "railway",
+    "host": "mysql.railway.internal",
     "dialect": "mysql",
     "port": 3306
   },
   "test": {
     "username": "root",
-    "password": "Kigali@123",
-    "database": "HealthSyncRwanda_test",
-    "host": "localhost",
+    "password": "ghxhXOVMUqCDwyyllFHPFbcsgtvnBwgz",
+    "database": "railway",
+    "host": "mysql.railway.internal",
     "dialect": "mysql",
     "port": 3306
   },
   "production": {
     "username": "root",
-    "password": "Kigali@123",
-    "database": "HealthSyncRwanda_production",
-    "host": "localhost",
+    "password": "ghxhXOVMUqCDwyyllFHPFbcsgtvnBwgz",
+    "database": "railway",
+    "host": "mysql.railway.internal",
     "dialect": "mysql",
     "port": 3306
   }
