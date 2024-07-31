@@ -12,6 +12,7 @@ import {
   updateMedicalRecord,
   updateHospitalInfo,
   allUsers,
+  getMedicalRecordById,
 } from "../controllers/userController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
@@ -37,6 +38,7 @@ router.get("/patients/:id", authMiddleware, getPatientById);
 
 // Medical record-related routes
 router.post("/records", authMiddleware, addMedicalRecord);
+router.put("/records/:recordId", authMiddleware, getMedicalRecordById);
 router.put("/records/:recordId", authMiddleware, updateMedicalRecord);
 router.get("/records/:patientId", authMiddleware, getPatientMedicalRecords);
 

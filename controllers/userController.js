@@ -633,3 +633,27 @@ export const updateMedicalRecord = async (req, res) => {
     res.status(500).json({ message: "Failed to update medical record" });
   }
 };
+
+
+export const getMedicalRecordById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const medicalRecord = await MedicalRecord.findOne({
+      where: { id },
+      include: [
+        { model: Medication },
+        { model: MedicalRecordImage }
+      ]
+    });
+
+    if (!medicalRecord) {
+      return res.status(404).json({ message: 'Medical record not found' });
+    }
+
+    res.json(medicalRecord);
+  } catch (error) {
+    console.error('Error fetching medical record:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

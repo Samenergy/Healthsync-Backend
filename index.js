@@ -12,7 +12,7 @@ import reportRoutes from "./routes/reportRoutes.js";
 dotenv.config();
 
 const corsOptions = {
-  origin: " http://localhost:5173",
+  origin: "https://healthsync.up.railway.app",
   allowedHeaders: ["Authorization", "Content-Type"],
 };
 
