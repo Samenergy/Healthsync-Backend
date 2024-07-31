@@ -12,7 +12,7 @@ import reportRoutes from "./routes/reportRoutes.js";
 dotenv.config();
 
 const corsOptions = {
-  origin: "https://healthsync.up.railway.app",
+  origin: "https://healthsyncrwanda.vercel.app",
   allowedHeaders: ["Authorization", "Content-Type"],
 };
 
