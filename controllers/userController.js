@@ -651,3 +651,26 @@ export const getMedicalRecordById = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+export const getMedicalRecordIdsByStatus = async (req, res) => {
+  try {
+    const records = await MedicalRecord.findAll({
+      attributes: ['id'],
+      where: {
+        status: 'IN PROGRESS',
+      },
+    });
+
+    const recordIds = records.map(record => record.id);
+
+    res.status(200).json({
+      success: true,
+      data: recordIds,
+    });
+  } catch (error) {
+    console.error('Error fetching medical record IDs:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch medical record IDs',
+    });
+  }
+};

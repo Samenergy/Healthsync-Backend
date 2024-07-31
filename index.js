@@ -16,17 +16,14 @@ const corsOptions = {
   allowedHeaders: ["Authorization", "Content-Type"],
 };
 
-// Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Get the directory name
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Middleware setup
 app.use(cors(corsOptions));
-app.use(express.json()); // Parses incoming JSON requests
+app.use(express.json()); 
 app.use(express.urlencoded({ extended: true })); // Parses incoming URL-encoded data
 
 // Serve static files from the 'uploads' directory
