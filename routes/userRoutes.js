@@ -39,7 +39,7 @@ router.get("/patients/:id", authMiddleware, getPatientById);
 
 // Medical record-related routes
 router.post("/records", authMiddleware, addMedicalRecord);
-router.put("/records/:recordId", authMiddleware, getMedicalRecordById);
+router.get("/records/:recordId", authMiddleware, getMedicalRecordById);
 router.put("/records/:recordId", authMiddleware, updateMedicalRecord);
 router.get("/records/:patientId", authMiddleware, getPatientMedicalRecords);
 router.get('/in-progress',authMiddleware ,getInProgressRecords);
