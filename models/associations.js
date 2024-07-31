@@ -1,4 +1,3 @@
-// models/associations.js
 import { Patient } from './Patient.js';
 import { MedicalRecord } from './MedicalRecord.js';
 import { Medication } from './Medication.js';
