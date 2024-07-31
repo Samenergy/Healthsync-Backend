@@ -656,7 +656,7 @@ export const getMedicalRecordIdsByStatus = async (req, res) => {
     const records = await MedicalRecord.findAll({
       attributes: ["id"],
       where: {
-        status: "In Progress",
+        status: "Done",
       },
     });
 
