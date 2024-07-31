@@ -651,15 +651,16 @@ export const getMedicalRecordById = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-export const getMedicalRecordIdsByStatus = async (req, res) => {
+export const getInProgressRecords = async (req, res) => {
   try {
     const records = await MedicalRecord.findAll({
       attributes: ["id"],
       where: {
-        status: "Done",
+        status: "In Progress",
       },
     });
 
+    // Map the result to return only the IDs
     const recordIds = records.map((record) => record.id);
 
     res.status(200).json({
@@ -667,10 +668,10 @@ export const getMedicalRecordIdsByStatus = async (req, res) => {
       data: recordIds,
     });
   } catch (error) {
-    console.error("Error fetching medical record IDs:", error);
+    console.error("Error fetching records:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to fetch medical record IDs",
+      message: "Server error",
     });
   }
 };
