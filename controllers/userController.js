@@ -15,13 +15,14 @@ export const allUsers = async (req, res) => {
 
   try {
     // Fetch all users related to the hospital
-    const [administrators, doctors, nurses, receptionists, cashiers] = await Promise.all([
-      Administrator.findAll({ where: { hospitalId } }),
-      Doctor.findAll({ where: { hospitalId } }),
-      Nurse.findAll({ where: { hospitalId } }),
-      Receptionist.findAll({ where: { hospitalId } }),
-      Cashier.findAll({ where: { hospitalId } })
-    ]);
+    const [administrators, doctors, nurses, receptionists, cashiers] =
+      await Promise.all([
+        Administrator.findAll({ where: { hospitalId } }),
+        Doctor.findAll({ where: { hospitalId } }),
+        Nurse.findAll({ where: { hospitalId } }),
+        Receptionist.findAll({ where: { hospitalId } }),
+        Cashier.findAll({ where: { hospitalId } }),
+      ]);
 
     // Combine all users into one array
     const allUsers = {
@@ -29,18 +30,15 @@ export const allUsers = async (req, res) => {
       doctors,
       nurses,
       receptionists,
-      cashiers
+      cashiers,
     };
 
     res.status(200).json(allUsers);
   } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-
-
 
 export const getUserData = async (req, res) => {
   try {
@@ -235,7 +233,12 @@ export const updateHospitalInfo = async (req, res) => {
     // Check if the user is an administrator
     const admin = await models.Administrator.findByPk(req.user.id);
     if (!admin) {
-      return res.status(403).json({ message: "Access denied. Only administrators can update hospital information." });
+      return res
+        .status(403)
+        .json({
+          message:
+            "Access denied. Only administrators can update hospital information.",
+        });
     }
 
     // Find the hospital by ID
@@ -251,7 +254,8 @@ export const updateHospitalInfo = async (req, res) => {
     if (email) hospital.email = email;
     if (phoneNumber) hospital.phoneNumber = phoneNumber;
     if (taxIdNumber) hospital.taxIdNumber = taxIdNumber;
-    if (businessRegistrationNumber) hospital.businessRegistrationNumber = businessRegistrationNumber;
+    if (businessRegistrationNumber)
+      hospital.businessRegistrationNumber = businessRegistrationNumber;
     if (country) hospital.country = country;
     if (province) hospital.province = province;
     if (district) hospital.district = district;
@@ -266,7 +270,9 @@ export const updateHospitalInfo = async (req, res) => {
     await hospital.save();
     res.json(hospital);
   } catch (error) {
-    res.status(500).json({ message: "Error updating hospital information", error });
+    res
+      .status(500)
+      .json({ message: "Error updating hospital information", error });
   }
 };
 
@@ -490,7 +496,7 @@ export const getPatientMedicalRecords = async (req, res) => {
       include: [
         {
           model: Medication,
-          attributes: ["id", "medication"], 
+          attributes: ["id", "medication"],
         },
         {
           model: MedicalRecordImage,
@@ -531,7 +537,7 @@ export const getPatientMedicalRecords = async (req, res) => {
 };
 export const updateMedicalRecord = async (req, res) => {
   try {
-    const { recordId } = req.params; // ID of the record to be updated
+    const { recordId } = req.params;
     const {
       date,
       description,
@@ -548,18 +554,17 @@ export const updateMedicalRecord = async (req, res) => {
       socialHistory,
       doctorname,
       Hospitalname,
-      medications, // Array of medication objects
-      images, // Array of image objects
+      medications,
+      images,
     } = req.body;
 
-    // Find the medical record by ID
-    const medicalRecord = await MedicalRecord.findByPk(recordId);
+    console.log("Request body:", req.body);
 
+    const medicalRecord = await MedicalRecord.findByPk(recordId);
     if (!medicalRecord) {
       return res.status(404).json({ message: "Medical record not found" });
     }
 
-    // Update the medical record
     await medicalRecord.update({
       date,
       description,
@@ -578,7 +583,6 @@ export const updateMedicalRecord = async (req, res) => {
       Hospitalname,
     });
 
-    // Update related medications
     if (medications && medications.length > 0) {
       await Promise.all(
         medications.map(async (medication) => {
@@ -605,7 +609,6 @@ export const updateMedicalRecord = async (req, res) => {
       );
     }
 
-    // Update related images
     if (images && images.length > 0) {
       await Promise.all(
         images.map(async (image) => {
@@ -635,6 +638,11 @@ export const updateMedicalRecord = async (req, res) => {
     res.status(200).json({ message: "Medical record updated successfully" });
   } catch (error) {
     console.error("Error updating medical record:", error);
-    res.status(500).json({ message: "Failed to update medical record" });
+    res
+      .status(500)
+      .json({
+        message: "Failed to update medical record",
+        error: error.message,
+      });
   }
 };
