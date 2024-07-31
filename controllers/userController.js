@@ -636,6 +636,11 @@ export const getMedicalRecordById = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Check if the ID is provided
+    if (!id) {
+      return res.status(400).json({ message: "ID parameter is required" });
+    }
+
     // Fetch the medical record with associated images and medications
     const medicalRecord = await MedicalRecord.findOne({
       where: { id },
