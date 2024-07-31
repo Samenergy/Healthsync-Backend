@@ -632,25 +632,39 @@ export const updateMedicalRecord = async (req, res) => {
   }
 };
 
-export const getMedicalRecordById = async (req, res) => {
+async function getMedicalRecordById(req, res) {
   const { id } = req.params;
 
   try {
-    const medicalRecord = await MedicalRecord.findOne({
-      where: { id },
-      include: [{ model: Medication }, { model: MedicalRecordImage }],
+    const medicalRecord = await MedicalRecord.findByPk(id, {
+      include: [
+        {
+          model: Medication,
+          as: 'medications', // Ensure this matches the alias you used in associations
+        },
+        {
+          model: MedicalRecordImage,
+          as: 'images', // Ensure this matches the alias you used in associations
+        },
+        {
+          model: Patient,
+          as: 'patient', // Ensure this matches the alias you used in associations
+        },
+      ],
     });
 
     if (!medicalRecord) {
-      return res.status(404).json({ message: "Medical record not found" });
+      return res.status(404).json({ message: 'Medical record not found' });
     }
 
-    res.json(medicalRecord);
+    return res.json(medicalRecord);
   } catch (error) {
-    console.error("Error fetching medical record:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error('Error fetching medical record:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
-};
+}
+
+export { getMedicalRecordById };
 export const getInProgressRecords = async (req, res) => {
   try {
     const records = await MedicalRecord.findAll({
