@@ -635,6 +635,10 @@ export const updateMedicalRecord = async (req, res) => {
 export const getMedicalRecordById = async (req, res) => {
   const { id } = req.params;
 
+  if (!id) {
+    return res.status(400).json({ message: "Invalid ID" });
+  }
+
   try {
     const medicalRecord = await MedicalRecord.findOne({
       where: { id },
@@ -651,6 +655,7 @@ export const getMedicalRecordById = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 export const getInProgressRecords = async (req, res) => {
   try {
     const records = await MedicalRecord.findAll({
