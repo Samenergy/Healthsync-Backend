@@ -490,7 +490,7 @@ export const getPatientMedicalRecords = async (req, res) => {
       include: [
         {
           model: Medication,
-          attributes: ["id", "medication"], // Include relevant medication attributes
+          attributes: ["id", "medication"], 
         },
         {
           model: MedicalRecordImage,
@@ -582,12 +582,19 @@ export const updateMedicalRecord = async (req, res) => {
     if (medications && medications.length > 0) {
       await Promise.all(
         medications.map(async (medication) => {
-          const existingMedication = await Medication.findOne({
-            where: { medicalRecordId: recordId, id: medication.id },
-          });
+          if (medication.id) {
+            const existingMedication = await Medication.findOne({
+              where: { medicalRecordId: recordId, id: medication.id },
+            });
 
-          if (existingMedication) {
-            await existingMedication.update(medication);
+            if (existingMedication) {
+              await existingMedication.update(medication);
+            } else {
+              await Medication.create({
+                ...medication,
+                medicalRecordId: recordId,
+              });
+            }
           } else {
             await Medication.create({
               ...medication,
@@ -602,12 +609,19 @@ export const updateMedicalRecord = async (req, res) => {
     if (images && images.length > 0) {
       await Promise.all(
         images.map(async (image) => {
-          const existingImage = await MedicalRecordImage.findOne({
-            where: { medicalRecordId: recordId, id: image.id },
-          });
+          if (image.id) {
+            const existingImage = await MedicalRecordImage.findOne({
+              where: { medicalRecordId: recordId, id: image.id },
+            });
 
-          if (existingImage) {
-            await existingImage.update(image);
+            if (existingImage) {
+              await existingImage.update(image);
+            } else {
+              await MedicalRecordImage.create({
+                ...image,
+                medicalRecordId: recordId,
+              });
+            }
           } else {
             await MedicalRecordImage.create({
               ...image,
@@ -620,7 +634,7 @@ export const updateMedicalRecord = async (req, res) => {
 
     res.status(200).json({ message: "Medical record updated successfully" });
   } catch (error) {
-    console.error(error);
+    console.error("Error updating medical record:", error);
     res.status(500).json({ message: "Failed to update medical record" });
   }
 };
