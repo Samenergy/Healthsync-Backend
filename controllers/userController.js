@@ -665,7 +665,7 @@ export const getInProgressRecords = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: recordIds,
+      id: recordIds,
     });
   } catch (error) {
     console.error("Error fetching records:", error);
