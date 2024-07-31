@@ -233,12 +233,10 @@ export const updateHospitalInfo = async (req, res) => {
     // Check if the user is an administrator
     const admin = await models.Administrator.findByPk(req.user.id);
     if (!admin) {
-      return res
-        .status(403)
-        .json({
-          message:
-            "Access denied. Only administrators can update hospital information.",
-        });
+      return res.status(403).json({
+        message:
+          "Access denied. Only administrators can update hospital information.",
+      });
     }
 
     // Find the hospital by ID
@@ -634,26 +632,22 @@ export const updateMedicalRecord = async (req, res) => {
   }
 };
 
-
 export const getMedicalRecordById = async (req, res) => {
   const { id } = req.params;
 
   try {
     const medicalRecord = await MedicalRecord.findOne({
       where: { id },
-      include: [
-        { model: Medication },
-        { model: MedicalRecordImage }
-      ]
+      include: [{ model: Medication }, { model: MedicalRecordImage }],
     });
 
     if (!medicalRecord) {
-      return res.status(404).json({ message: 'Medical record not found' });
+      return res.status(404).json({ message: "Medical record not found" });
     }
 
     res.json(medicalRecord);
   } catch (error) {
-    console.error('Error fetching medical record:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error fetching medical record:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

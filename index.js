@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import path from "path";
-import { fileURLToPath } from "url"; // Import fileURLToPath from 'url'
+import { fileURLToPath } from "url";
 import userRoutes from "./routes/userRoutes.js";
 import sequelize from "./config/database.js";
 import authRoutes from "./routes/AuthRoutes.js";
