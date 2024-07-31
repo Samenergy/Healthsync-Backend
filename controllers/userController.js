@@ -537,7 +537,7 @@ export const getPatientMedicalRecords = async (req, res) => {
 };
 export const updateMedicalRecord = async (req, res) => {
   try {
-    const { recordId } = req.params;
+    const { recordId } = req.params; // ID of the record to be updated
     const {
       date,
       description,
@@ -554,17 +554,18 @@ export const updateMedicalRecord = async (req, res) => {
       socialHistory,
       doctorname,
       Hospitalname,
-      medications,
-      images,
+      medications, // Array of medication text strings
+      images, // Array of image objects
     } = req.body;
 
-    console.log("Request body:", req.body);
-
+    // Find the medical record by ID
     const medicalRecord = await MedicalRecord.findByPk(recordId);
+
     if (!medicalRecord) {
       return res.status(404).json({ message: "Medical record not found" });
     }
 
+    // Update the medical record
     await medicalRecord.update({
       date,
       description,
@@ -583,32 +584,23 @@ export const updateMedicalRecord = async (req, res) => {
       Hospitalname,
     });
 
+    // Update related medications
     if (medications && medications.length > 0) {
+      // Delete existing medications for this record
+      await Medication.destroy({ where: { medicalRecordId: recordId } });
+
+      // Add new medications
       await Promise.all(
         medications.map(async (medication) => {
-          if (medication.id) {
-            const existingMedication = await Medication.findOne({
-              where: { medicalRecordId: recordId, id: medication.id },
-            });
-
-            if (existingMedication) {
-              await existingMedication.update(medication);
-            } else {
-              await Medication.create({
-                ...medication,
-                medicalRecordId: recordId,
-              });
-            }
-          } else {
-            await Medication.create({
-              ...medication,
-              medicalRecordId: recordId,
-            });
-          }
+          await Medication.create({
+            medicalRecordId: recordId,
+            medication,
+          });
         })
       );
     }
 
+    // Update related images
     if (images && images.length > 0) {
       await Promise.all(
         images.map(async (image) => {
@@ -638,11 +630,6 @@ export const updateMedicalRecord = async (req, res) => {
     res.status(200).json({ message: "Medical record updated successfully" });
   } catch (error) {
     console.error("Error updating medical record:", error);
-    res
-      .status(500)
-      .json({
-        message: "Failed to update medical record",
-        error: error.message,
-      });
+    res.status(500).json({ message: "Failed to update medical record" });
   }
 };

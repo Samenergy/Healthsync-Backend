@@ -12,7 +12,7 @@ import reportRoutes from "./routes/reportRoutes.js";
 dotenv.config();
 
 const corsOptions = {
-  origin: "https://healthsyncrwanda.vercel.app",
+  origin: " http://localhost:5173",
   allowedHeaders: ["Authorization", "Content-Type"],
 };
 
