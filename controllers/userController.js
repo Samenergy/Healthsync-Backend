@@ -635,38 +635,32 @@ export const updateMedicalRecord = async (req, res) => {
 export const getMedicalRecordById = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log('Request params:', req.params); // Add this line to log the params
 
-    // Check if the ID is provided
     if (!id) {
-      return res.status(400).json({ message: 'ID parameter is required' });
+      return res
+        .status(400)
+        .json({ message: "Missing or invalid ID parameter" });
     }
 
-    // Fetch the medical record with associated images and medications
     const medicalRecord = await MedicalRecord.findOne({
       where: { id },
       include: [
-        {
-          model: MedicalRecordImage,
-          attributes: ['id', 'image']
-        },
-        {
-          model: Medication,
-          attributes: ['id', 'medication']
-        }
-      ]
+        { model: Medication, attributes: ["id", "medication"] },
+        { model: MedicalRecordImage, attributes: ["id", "image"] },
+      ],
     });
 
     if (!medicalRecord) {
-      return res.status(404).json({ message: 'Medical record not found' });
+      return res.status(404).json({ message: "Medical record not found" });
     }
 
     res.status(200).json(medicalRecord);
   } catch (error) {
-    console.error('Error fetching medical record:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error fetching medical record by ID:", error);
+    res.status(500).json({ message: "Server error", error });
   }
 };
+
 export const getInProgressRecords = async (req, res) => {
   try {
     const records = await MedicalRecord.findAll({

@@ -16,3 +16,4 @@ function setupAssociations() {
 }
 
 export { setupAssociations };
+
