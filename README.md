@@ -48,7 +48,7 @@ Follow these steps to get the project up and running:
    Navigate into the project directory:
 
    ```bash
-   cd healthsync-rwanda-backend
+   cd Healthsync-Backend
    ```
 
 2. **Install dependencies:**
